@@ -50,7 +50,11 @@ func calculateNeonAdler32(data []byte) uint32 {
 
 ## Performance Results
 
-### Implementation Comparison
+### Neoverse N1 Performance Results
+
+The following performance results were measured on a system with a Neoverse N1 processor:
+
+#### Implementation Comparison
 
 The project includes three different implementations of Adler32:
 
@@ -68,7 +72,7 @@ Here are the performance results for each implementation:
 | 1 MB      | 704.285µs| 3.349ms    | 917.258µs  | 368.478µs | 1.91×             |
 | 10 MB     | 7.054ms | 33.495ms    | 9.176ms    | 3.706ms   | 1.90×             |
 
-### Compiler Comparison for NEON Implementation
+#### Compiler Comparison for NEON Implementation
 
 The NEON implementation was compiled with both GCC and Clang to compare performance:
 
@@ -80,12 +84,45 @@ The NEON implementation was compiled with both GCC and Clang to compare performa
 | 1 MB      | 705.664µs| 367.438µs| 276.053µs | 2.55×               | 1.33×       |
 | 10 MB     | 7.054ms | 3.695ms  | 2.691ms    | 2.62×               | 1.37×       |
 
-*Note: Actual performance numbers may vary based on your specific ARM hardware. These results were measured on the test system.*
+*Note: Actual performance numbers may vary based on your specific ARM hardware. These results were measured on the Neoverse N1 test system.*
+
+### Neoverse V2 Performance Results (April 2025)
+
+We also tested the implementations on a Neoverse V2 processor, which showed different performance characteristics:
+
+#### Simple Implementation (Scalar)
+| Data Size | Go Time | Simple Time | Speedup vs Go |
+|-----------|---------|-------------|--------------|
+| 1 KB      | 392ns   | 2.628µs     | 0.15×        |
+| 10 KB     | 3.935µs | 25.772µs    | 0.15×        |
+| 100 KB    | 39.679µs| 257.517µs   | 0.15×        |
+| 1 MB      | 403.678µs| 2.630887ms | 0.15×        |
+| 10 MB     | 4.025969ms| 26.309335ms| 0.15×        |
+
+#### Block Implementation (Optimized Scalar)
+| Data Size | Go Time | Block Time | Speedup vs Go |
+|-----------|---------|------------|--------------|
+| 1 KB      | 393ns   | 645ns      | 0.61×        |
+| 10 KB     | 3.927µs | 5.867µs    | 0.67×        |
+| 100 KB    | 39.25µs | 58.176µs   | 0.67×        |
+| 1 MB      | 401.945µs| 594.972µs | 0.68×        |
+| 10 MB     | 4.028003ms| 5.957824ms| 0.68×        |
+
+#### NEON Implementation (Clang vs GCC)
+| Data Size | Go Time | Clang Time | GCC Time | GCC Speedup vs Go |
+|-----------|---------|------------|----------|-------------------|
+| 1 KB      | 392ns   | 2.631µs    | 2.627µs  | 0.15×             |
+| 10 KB     | 3.944µs | 1.19µs     | 908ns    | 4.38×             |
+| 100 KB    | 39.234µs| 19.8µs     | 15.267µs | 2.60×             |
+| 1 MB      | 402.348µs| 206.185µs | 159.349µs| 2.52×             |
+| 10 MB     | 4.024462ms| 2.079317ms| 1.578822ms| 2.55×           |
 
 Key observations:
 - For small data sizes (1 KB), all C implementations are slower than Go due to function call overhead
 - The NEON implementation is significantly faster than both scalar implementations for data sizes ≥ 10 KB
-- Clang consistently produces faster code than GCC for the NEON implementation, with up to 98% better performance
+- On the original test system, Clang consistently produces faster code than GCC for the NEON implementation, with up to 98% better performance
+- On the Neoverse V2 system, GCC produces faster code than Clang for the NEON implementation, with approximately 30% better performance
+- The Block implementation is slower than Go on the Neoverse V2 system, unlike the results on the original test system
 - The optimized implementations show the greatest advantage at the 10 KB data size
 
 ## Building and Running
